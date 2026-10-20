@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youde Food - FINAL - Blocage Rôle Client/Vendeur/Livreur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Inter, sans-serif
+        }
+
+        body {
+            background: #f6f7f2
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 22px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+            position: sticky;
+            top: 0;
+            z-index: 30
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 13px
+        }
+
+        .btn-orange {
+            background: #f97316;
+            color: #fff
+        }
+
+        .btn-green {
+            background: #0e4d2e;
+            color: #fff
+        }
+
+        .btn-blue {
+            background: #2563eb;
+            color: #fff
+        }
+
+        .btn-white {
+            background: #fff;
+            border: 1px solid #ddd
+        }
+
+        .btn-red {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-wa {
+            background: #25D366;
+            color: #fff
+        }
+
+        .btn-dark {
+            background: #111827;
+            color: #fff
+        }
+
+        .grid {
+            max-width: 1150px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            padding: 14px
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+            border: 1px solid #eee;
+            cursor: pointer
+        }
+
+        .card-img {
+            width: 100%;
+            height: 170px;
+            background: linear-gradient(135deg, #0e4d2e, #f97316);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 900;
+            overflow: hidden
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover
+        }
+
+        .vendeur-wrap {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 14px
+        }
+
+        .vendeur-box {
+            background: #fff;
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .08)
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            margin-top: 8px;
+            font-size: 13px
+        }
+
+        .preview {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-top: 8px;
+            display: none;
+            border: 2px solid #0e4d2e
+        }
+
+        #cart {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 460px;
+            max-width: 100%;
+            height: 100vh;
+            background: #fff;
+            box-shadow: -8px 0 20px rgba(0, 0, 0, .15);
+            transform: translateX(100%);
+            transition: .3s;
+            z-index: 100;
+            display: flex;
+            flex-direction: column
+        }
+
+        #cart.open {
+            transform: translateX(0)
+        }
+
+        #cart-items {
+            flex: 1;
+            overflow: auto;
+            padding: 10px
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 14px
+        }
+
+        #modal.open {
+            display: flex
+        }
+
+        .box {
+            background: #fff;
+            width: 600px;
+            max-width: 100%;
+            border-radius: 18px;
+            padding: 16px;
+            max-height: 90vh;
+            overflow: auto
+        }
+
+        .order-item {
+            background: #fafafa;
+            padding: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #0e4d2e;
+            margin-bottom: 8px;
+            font-size: 11px
+        }
+
+        .order-item.escrow {
+            border-left-color: #f59e0b;
+            background: #fffbeb
+        }
+
+        .order-item.delivering {
+            border-left-color: #2563eb;
+            background: #eff6ff
+        }
+
+        .order-item.done {
+            border-left-color: #10b981;
+            background: #f0fdf4
+        }
+
+        .hidden {
+            display: none
+        }
+
+        .zone-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 2px solid #0e4d2e;
+            border-radius: 10px;
+            max-height: 280px;
+            overflow: auto;
+            display: none;
+            z-index: 50
+        }
+
+        .zone-list.open {
+            display: block
+        }
+
+        .zone-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between
+        }
+
+        .commune-tabs {
+            max-width: 1150px;
+            margin: 8px auto;
+            padding: 0 14px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap
+        }
+
+        .commune-tab {
+            padding: 6px 12px;
+            background: #fff;
+            border-radius: 999px;
+            border: 1px solid #ddd;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+        .commune-tab.active {
+            background: #0e4d2e;
+            color: #fff
+        }
+
+        .pay-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin: 8px 0
+        }
+
+        .pay-card {
+            border: 2px solid #eee;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 700
+        }
+
+        .pay-card.active {
+            border-color: #0e4d2e;
+            background: #f0fdf4
+        }
+
+        .auth-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            padding: 12px
+        }
+
+        .auth-modal.open {
+            display: flex
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            background: #fff;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: center;
+            font-size: 12px
+        }
+
+        .auth-tab.active {
+            background: #0e4d2e;
+            color: #fff;
+            border-color: #0e4d2e
+        }
+
+        .user-badge {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #0e4d2e;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800
+        }
+
+        .input-error {
+            border-color: #ef4444 !important;
+            background: #fef2f2 !important
+        }
+
+        .input-ok {
+            border-color: #10b981 !important;
+            background: #f0fdf4 !important
+        }
+
+        .error {
+            color: #ef4444;
+            font-size: 10px;
+            font-weight: 800;
+            margin-top: 4px;
+            display: none;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 6px 8px;
+            border-radius: 8px
+        }
+
+        .error.show {
+            display: block
+        }
+
+        .ok {
+            color: #10b981;
+            font-size: 10px;
+            font-weight: 700;
+            display: none
+        }
+
+        .ok.show {
+            display: block
+        }
+
+        .pw {
+            position: relative;
+            display: flex;
+            align-items: center
+        }
+
+        .pw input {
+            padding-right: 40px
+        }
+
+        .eye {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer
+        }
+
+        .role-locked {
+            opacity: .4;
+            pointer-events: none;
+            filter: grayscale(1);
+            position: relative
+        }
+
+        .role-locked::after {
+            content: '🔒 Bloqué - Compte ' +attr(data-role);
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, .7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 12px;
+            border-radius: 20px
+        }
+
+        @media(max-width:900px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div style="font-weight:900;font-size:20px"><span style="color:#0e4d2e">Youde</span> <span
+                style="color:#f97316">Food</span> <small
+                style="font-size:7px;background:#0e4d2e;color:#fff;padding:3px 7px;border-radius:999px">BLOCAGE
+                RÔLE</small></div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <div id="userInfo" class="hidden"></div>
+            <button id="authBtn" class="btn btn-green" style="font-size:11px" onclick="openAuth()">👤 Compte</button>
+            <button id="logoutBtn" class="btn btn-white hidden" style="font-size:11px"
+                onclick="logout()">Déconnexion</button>
+            <button class="btn btn-white" onclick="showRoles()" style="font-size:11px">Rôle</button>
+            <button class="btn" style="background:#ffedd5;color:#f97316;font-size:11px" onclick="toggleCart()">Panier <b
+                    id="count">0</b></button>
+            <button class="btn btn-white" style="font-size:11px" onclick="openOrders()">Suivi</button>
+        </div>
+    </header>
+
+    <div id="roleScreen" style="max-width:1200px;margin:20px auto;text-align:center;padding:20px">
+        <h1>🇨🇮 Youde Food - Blocage Rôle Activé</h1>
+        <p style="font-size:11px;color:#666;margin-top:6px">Après inscription → compte bloqué sur son rôle - Vendeur ≠
+            Client - Client ≠ Vendeur</p>
+        <div id="authPrompt"
+            style="max-width:600px;margin:16px auto;background:#fffbeb;border:2px solid #f59e0b;border-radius:16px;padding:16px">
+            <h3 style="font-size:13px" id="rolePromptTitle">👤 Choisis ton rôle définitif</h3>
+            <p style="font-size:11px;color:#78350f;margin-top:6px" id="rolePromptText">Une fois ton compte créé, tu ne
+                pourras plus changer de rôle avec le même numéro. Vendeur reste vendeur, Client reste client. Pour autre
+                rôle, crée autre compte avec autre numéro.</p>
+            <button class="btn btn-green" style="margin-top:10px;width:100%;padding:12px" onclick="openAuth()"
+                id="mainAuthBtn">👤 Créer mon compte - Rôle définitif</button>
+            <div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-white" style="flex:1;font-size:11px"
+                    onclick="openAuth('login')">Connexion</button><button class="btn btn-white"
+                    style="flex:1;font-size:11px" onclick="openAuth('forgot')">🔑 Oublié</button></div>
+        </div>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:20px">
+            <div id="cardClient"
+                style="background:#fff;border-radius:20px;padding:20px;width:300px;box-shadow:0 8px 25px rgba(0,0,0,.08);cursor:pointer"
+                onclick="requireAuthAndChoose('client')">
+                <div style="font-size:40px">🍽️</div>
+                <h2 style="font-size:14px">CLIENT - Suivi</h2>
+                <p style="font-size:10px;color:#666" id="clientDesc">Commande + Escrow + Suivi</p><button
+                    class="btn btn-orange" style="width:100%;margin-top:10px" id="btnClient">Commander</button>
+                <div id="lockClient" class="hidden"
+                    style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;padding:6px;border-radius:8px;font-size:10px;color:#991b1b;font-weight:800">
+                    🔒 Bloqué - Ton compte est Vendeur/Livreur, pas Client</div>
+            </div>
+            <div id="cardVendeur"
+                style="background:#fff;border-radius:20px;padding:20px;width:300px;box-shadow:0 8px 25px rgba(0,0,0,.08);cursor:pointer"
+                onclick="requireAuthAndChoose('vendeur')">
+                <div style="font-size:40px">👨‍🍳</div>
+                <h2 style="font-size:14px">VENDEUR - Photo</h2>
+                <p style="font-size:10px;color:#666" id="vendeurDesc">Vends + Accepte/Refuse</p><button
+                    class="btn btn-green" style="width:100%;margin-top:10px" id="btnVendeur">Vendre</button>
+                <div id="lockVendeur" class="hidden"
+                    style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;padding:6px;border-radius:8px;font-size:10px;color:#991b1b;font-weight:800">
+                    🔒 Bloqué - Ton compte est Client/Livreur, pas Vendeur</div>
+            </div>
+            <div id="cardLivreur"
+                style="background:#fff;border-radius:20px;padding:20px;width:300px;box-shadow:0 8px 25px rgba(0,0,0,.08);cursor:pointer;border:2px solid #2563eb"
+                onclick="requireAuthAndChoose('livreur')">
+                <div style="font-size:40px">🛵</div>
+                <h2 style="font-size:14px">LIVREUR - Gagne</h2>
+                <p style="font-size:10px;color:#666" id="livreurDesc">Accepte livraison + Gagne</p><button
+                    class="btn btn-blue" style="width:100%;margin-top:10px" id="btnLivreur">Livrer - Gagner</button>
+                <div id="lockLivreur" class="hidden"
+                    style="margin-top:8px;background:#fef2f2;border:1px solid #fecaca;padding:6px;border-radius:8px;font-size:10px;color:#991b1b;font-weight:800">
+                    🔒 Bloqué - Ton compte est Client/Vendeur, pas Livreur</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="clientView" class="hidden">
+        <div style="max-width:1150px;margin:12px auto;padding:0 18px"><input id="plat-search"
+                placeholder="Rechercher..." oninput="filterPlats(this.value)"
+                style="width:100%;padding:12px 16px;border-radius:999px;border:2px solid #e5e7eb"></div>
+        <div class="commune-tabs" id="communeTabs"></div>
+        <div id="grid" class="grid"></div>
+    </div>
+
+    <div id="vendeurView" class="hidden">
+        <div class="vendeur-wrap">
+            <div class="vendeur-box">
+                <h2>👨‍🍳 Vendeur</h2><input type="file" id="v-file" accept="image/*"
+                    onchange="previewVendeur(this)"><img id="v-preview" class="preview"><input type="hidden"
+                    id="v-photo"><input id="v-nom" placeholder="Nom plat"><input id="v-prix" type="number"
+                    placeholder="2500"><input id="v-tel" placeholder="05 86 81 94 78"><textarea
+                    id="v-desc"></textarea><button class="btn btn-green" style="width:100%;margin-top:12px;padding:14px"
+                    onclick="ajouterPlat()">✅ Ajouter</button>
+                <hr style="margin:14px 0">
+                <h3>Mes plats</h3>
+                <div id="vendeur-mes-plats"></div>
+                <hr style="margin:14px 0">
+                <h3>Commandes</h3>
+                <div id="vendeur-orders"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="livreurView" class="hidden">
+        <div class="vendeur-wrap">
+            <div class="vendeur-box">
+                <h2>🛵 Livreur</h2>
+                <div id="livreurSetup"><input id="l-nom" placeholder="Nom"><input id="l-tel"
+                        placeholder="05 86 81 94 78"><select id="l-transport">
+                        <option>Moto</option>
+                    </select><input id="l-zone" placeholder="Zone"><button class="btn btn-blue"
+                        style="width:100%;margin-top:10px;padding:12px" onclick="saveLivreur()">Devenir livreur</button>
+                </div>
+                <div id="livreurDashboard" class="hidden">
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0">
+                        <div style="background:#f6f7f2;padding:12px;border-radius:12px;text-align:center"><b
+                                id="l-total">0</b><br><small>Livraisons</small></div>
+                        <div style="background:#f0fdf4;padding:12px;border-radius:12px;text-align:center"><b
+                                id="l-gain">0F</b><br><small>Gains</small></div>
+                        <div style="background:#eff6ff;padding:12px;border-radius:12px;text-align:center"><b
+                                id="l-dispo">0</b><br><small>Dispo</small></div>
+                    </div>
+                    <h3 style="font-size:13px">🔥 Disponibles</h3>
+                    <div id="livreur-available"></div>
+                    <hr style="margin:14px 0">
+                    <h3 style="font-size:13px">📦 Mes livraisons</h3>
+                    <div id="livreur-my"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal">
+        <div class="box">
+            <div id="m-img-div" class="card-img" style="height:200px">PLAT</div>
+            <h3 id="m-nom"></h3>
+            <p id="m-desc"></p><b id="m-prix"></b>
+            <div style="display:flex;align-items:center;gap:8px;margin:10px 0"><button onclick="changeQty(-1)"
+                    style="width:30px;height:30px;border-radius:50%;border:1px solid #ddd">-</button><span
+                    id="m-qty">1</span><button onclick="changeQty(1)"
+                    style="width:30px;height:30px;border-radius:50%;border:1px solid #ddd">+</button><span id="m-total"
+                    style="margin-left:auto;font-weight:900"></span></div><button onclick="confirmAdd()"
+                style="width:100%;padding:10px;background:#0e4d2e;color:#fff;border:none;border-radius:10px">Ajouter</button>
+        </div>
+    </div>
+
+    <div id="authModal" class="auth-modal">
+        <div class="box" style="width:520px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                <h2 style="font-size:16px">👤 Compte - Rôle Définitif + Validation</h2><button onclick="closeAuth()"
+                    style="border:none;background:none;font-size:18px">X</button>
+            </div>
+            <div class="auth-tabs">
+                <div id="tabLogin" class="auth-tab active" onclick="switchAuthTab('login')">Connexion</div>
+                <div id="tabRegister" class="auth-tab" onclick="switchAuthTab('register')">Créer</div>
+                <div id="tabForgot" class="auth-tab" onclick="switchAuthTab('forgot')">🔑 Oublié</div>
+            </div>
+            <div id="loginForm"><label style="font-size:11px;font-weight:800">📱 Numéro *</label><input id="loginTel"
+                    placeholder="05 86 81 94 78" oninput="validateLoginTel()">
+                <div id="loginTelError" class="error">❌ Faux numéro - 10 chiffres 01/05/07</div><label
+                    style="font-size:11px;font-weight:800">🔒 Mot de passe *</label>
+                <div class="pw"><input id="loginPass" type="password"><button type="button" class="eye"
+                        onclick="togglePass('loginPass',this)">👁️</button></div>
+                <div id="loginError" class="error">❌ Faux identifiants</div><button class="btn btn-green"
+                    style="width:100%;padding:12px;margin-top:8px" onclick="login()">🔓 Se connecter</button><button
+                    onclick="switchAuthTab('forgot')"
+                    style="background:none;border:none;color:#ef4444;font-size:11px;margin-top:8px;text-decoration:underline;width:100%">🔑
+                    Oublié ?</button>
+            </div>
+            <div id="registerForm" class="hidden">
+                <label style="font-size:11px;font-weight:800">👤 Nom complet *</label><input id="regNom"
+                    placeholder="Yao Kouassi - min 3 lettres, pas de chiffres" oninput="validateNom()">
+                <div id="regNomError" class="error">❌ Faux nom - Mets vrai nom ex: Yao Kouassi</div>
+                <div id="regNomSuccess" class="ok">✅ Nom correct</div>
+                <label style="font-size:11px;font-weight:800">📱 Numéro *</label><input id="regTel"
+                    placeholder="05 86 81 94 78" oninput="validateTel()">
+                <div id="regTelError" class="error">❌ Faux numéro - 10 chiffres 01/05/07</div>
+                <div id="regTelSuccess" class="ok">✅ Correct</div>
+                <label style="font-size:11px;font-weight:800">📧 Email (optionnel)</label><input id="regEmail"
+                    placeholder="yao@gmail.com ou vide" oninput="validateEmail()">
+                <div id="regEmailError" class="error">❌ Faux email</div>
+                <div id="regEmailSuccess" class="ok">✅ Correct</div>
+                <label style="font-size:11px;font-weight:800">🎭 Je suis * - Rôle définitif (ne pourra plus
+                    changer)</label><select id="regRole">
+                    <option value="client">🍽️ Client - Commande seulement (ne pourra pas vendre)</option>
+                    <option value="vendeur">👨‍🍳 Vendeur - Vends seulement (ne pourra pas commander)</option>
+                    <option value="livreur">🛵 Livreur - Livre seulement (ne pourra pas commander/vendre)</option>
+                </select>
+                <label style="font-size:11px;font-weight:800">🔒 Mot de passe *</label>
+                <div class="pw"><input id="regPass" type="password" placeholder="Min 4" oninput="validatePass()"><button
+                        type="button" class="eye" onclick="togglePass('regPass',this)">👁️</button></div>
+                <div id="regPassError" class="error">❌ Min 4</div>
+                <div id="regPassSuccess" class="ok">✅ Correct</div>
+                <label style="font-size:11px;font-weight:800">🔒 Confirmer *</label>
+                <div class="pw"><input id="regPass2" type="password" placeholder="Confirme"
+                        oninput="validatePass2()"><button type="button" class="eye"
+                        onclick="togglePass('regPass2',this)">👁️</button></div>
+                <div id="regPass2Error" class="error">❌ Différents</div>
+                <div id="regPass2Success" class="ok">✅ Identiques</div>
+                <label style="font-size:10px"><input type="checkbox" id="regTerms" style="width:auto"> J'accepte - Rôle
+                    définitif</label>
+                <div id="regTermsError" class="error">❌ Coche</div>
+                <div id="globalError" class="error"></div>
+                <button class="btn btn-green" style="width:100%;padding:12px;margin-top:10px" onclick="register()">✅
+                    Créer compte - Rôle définitif</button>
+                <p style="font-size:9px;color:#666;margin-top:6px;text-align:center">Après inscription tu ne pourras
+                    plus te réinscrire avec même numéro + tu ne pourras pas utiliser ce compte dans un autre rôle</p>
+            </div>
+            <div id="forgotForm" class="hidden">
+                <div
+                    style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:10px;margin-bottom:10px">
+                    <h4 style="font-size:12px">🔑 Mot de passe oublié - Code SMS</h4>
+                </div>
+                <div id="forgotStep1"><label style="font-size:11px;font-weight:800">📱 Numéro inscrit *</label><input
+                        id="forgotTel" placeholder="05 86 81 94 78" oninput="validateForgotTel()">
+                    <div id="forgotTelError" class="error">❌ Faux numéro - Non trouvé</div>
+                    <div id="forgotTelSuccess" class="ok">✅ Trouvé</div><button class="btn btn-orange"
+                        style="width:100%;padding:12px;margin-top:8px" onclick="sendForgotCode()">📲 Envoyer code
+                        SMS</button>
+                </div>
+                <div id="forgotStep2" class="hidden">
+                    <p style="text-align:center;background:#ecfdf5;padding:8px;border-radius:12px;font-size:11px">📲
+                        Code au <b id="forgotTelDisplay"></b> - <b id="forgotCodeDisplay"></b></p><label
+                        style="font-size:11px;font-weight:800;margin-top:8px;display:block">Code SMS *</label><input
+                        id="forgotCode" placeholder="123456" maxlength="6"
+                        style="text-align:center;letter-spacing:6px;font-weight:800" oninput="validateForgotCode()">
+                    <div id="forgotCodeError" class="error">❌ Faux code</div>
+                    <div id="forgotCodeSuccess" class="ok">✅ Correct</div><label
+                        style="font-size:11px;font-weight:800;margin-top:8px;display:block">Nouveau *</label>
+                    <div class="pw"><input id="forgotPass" type="password" placeholder="Nouveau"
+                            oninput="validateForgotPass()"><button type="button" class="eye"
+                            onclick="togglePass('forgotPass',this)">👁️</button></div>
+                    <div id="forgotPassError" class="error">❌ Min 4</div><label
+                        style="font-size:11px;font-weight:800;margin-top:8px;display:block">Confirmer *</label>
+                    <div class="pw"><input id="forgotPass2" type="password" placeholder="Confirme"
+                            oninput="validateForgotPass2()"><button type="button" class="eye"
+                            onclick="togglePass('forgotPass2',this)">👁️</button></div>
+                    <div id="forgotPass2Error" class="error">❌ Différents</div>
+                    <div id="forgotError" class="error"></div>
+                    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-white" style="flex:1"
+                            onclick="resendForgotCode()">🔄 Renvoyer</button><button class="btn btn-green"
+                            style="flex:1" onclick="resetPassword()">✅ Réinitialiser</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ordersModal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center;padding:12px">
+        <div class="box">
+            <div style="display:flex;justify-content:space-between">
+                <h2 style="font-size:14px">📦 Suivi</h2><button onclick="closeOrders()"
+                    style="border:none;background:none;font-size:18px">X</button>
+            </div>
+            <div id="client-orders-list" style="margin-top:12px"></div>
+        </div>
+    </div>
+
+    <div id="cart">
+        <div style="padding:14px;border-bottom:1px solid #eee;display:flex;justify-content:space-between"><b>🛒 Panier -
+                Escrow + ID Transaction</b><button onclick="toggleCart()"
+                style="border:none;background:none;font-size:18px">✕</button></div>
+        <div id="cart-items"></div>
+        <div style="padding:14px;border-top:1px solid #eee;max-height:90vh;overflow:auto">
+            <div style="position:relative;margin-bottom:8px"><input id="zone-search"
+                    placeholder="Quartier - Ex: Riviera 2" oninput="searchZones(this.value)"
+                    onfocus="searchZones(this.value)" style="padding:12px">
+                <div id="zone-list" class="zone-list"></div>
+            </div><input type="hidden" id="zone">
+            <div id="zone-selected" style="font-size:11px;color:#0e4d2e;font-weight:700;margin-bottom:8px"></div>
+            <input id="adresse" placeholder="Adresse exacte + repère" style="padding:12px;margin-bottom:12px">
+            <input id="trans-id" placeholder="ID transaction Wave/Orange/Moov/MTN"
+                style="padding:14px;border:2px solid #111827;border-radius:12px;font-weight:600">
+            <div id="transError" class="error">❌ Mets ID transaction</div>
+            <div class="pay-grid">
+                <div class="pay-card active" id="cardWave" onclick="selectPayCard('Wave')">Wave</div>
+                <div class="pay-card" id="cardOrange" onclick="selectPayCard('Orange Money')">Orange</div>
+                <div class="pay-card" id="cardMoov" onclick="selectPayCard('Moov Money')">Moov</div>
+                <div class="pay-card" id="cardMTN" onclick="selectPayCard('MTN MoMo')">MTN</div>
+            </div>
+            <input id="payNumber" placeholder="Numéro Wave/Orange/Moov/MTN - Ex: 05 86 81 94 78"
+                style="margin-top:6px;font-size:11px">
+            <div id="payNumberError" class="error">❌ Faux numéro</div>
+            <div style="background:#f9fafb;border:1px solid #eef0f3;border-radius:12px;padding:10px;margin-top:12px">
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span>Sous-total</span><span
+                        id="escrowSub">0F</span></div>
+                <div style="display:flex;justify-content:space-between;font-weight:900;margin-top:6px;font-size:15px">
+                    <span>Total bloqué escrow</span><span id="escrowTotal">0F</span></div>
+                <div
+                    style="display:flex;justify-content:space-between;font-size:11px;margin-top:6px;background:#f0fdf4;padding:6px;border-radius:8px;color:#065f46">
+                    <span>💰 Versé vendeur après réception</span><span id="escrowToSeller">0F</span></div>
+            </div>
+            <button onclick="commanderEscrow()"
+                style="width:100%;padding:14px;background:#111827;color:#fff;border:none;border-radius:12px;margin-top:12px;font-weight:800">🔒
+                Commander - Escrow + Suivi temps réel</button><button class="btn btn-wa"
+                style="width:100%;margin-top:8px;padding:12px;border-radius:12px"
+                onclick="window.open('https://wa.me/2250586819478','_blank')">💬 Service Client WhatsApp Direct</button>
+        </div>
+    </div>
+
+    <script>
+        function togglePass(id, btn) { let i = document.getElementById(id); if (i.type == 'password') { i.type = 'text'; btn.textContent = '🙈'; } else { i.type = 'password'; btn.textContent = '👁️'; } }
+        function showError(a, b, c) { document.getElementById(a)?.classList.add('input-error'); document.getElementById(a)?.classList.remove('input-ok'); document.getElementById(b)?.classList.add('show'); if (c) document.getElementById(c)?.classList.remove('show'); }
+        function showOk(a, b, c) { document.getElementById(a)?.classList.remove('input-error'); document.getElementById(a)?.classList.add('input-ok'); document.getElementById(b)?.classList.remove('show'); if (c) document.getElementById(c)?.classList.add('show'); }
+        function hideVal(a, b, c) { document.getElementById(a)?.classList.remove('input-error', 'input-ok'); document.getElementById(b)?.classList.remove('show'); if (c) document.getElementById(c)?.classList.remove('show'); }
+        function validateNom() { let v = document.getElementById('regNom').value.trim(); if (!v) { hideVal('regNom', 'regNomError', 'regNomSuccess'); return false; } let ok = v.length >= 3 && /^[A-Za-zÀ-ÿ\s'\-]{3,}$/.test(v) && !/\d/.test(v); if (ok) showOk('regNom', 'regNomError', 'regNomSuccess'); else showError('regNom', 'regNomError', 'regNomSuccess'); return ok; }
+        function validateTel() { let v = document.getElementById('regTel').value.replace(/[^0-9]/g, ''); if (!v) { hideVal('regTel', 'regTelError', 'regTelSuccess'); return false; } let ok = v.length == 10 && (v.startsWith('01') || v.startsWith('05') || v.startsWith('07')); if (ok) showOk('regTel', 'regTelError', 'regTelSuccess'); else showError('regTel', 'regTelError', 'regTelSuccess'); return ok; }
+        function validateEmail() { let v = document.getElementById('regEmail').value.trim(); if (!v) { hideVal('regEmail', 'regEmailError', 'regEmailSuccess'); return true; } let ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length >= 5; if (ok) showOk('regEmail', 'regEmailError', 'regEmailSuccess'); else showError('regEmail', 'regEmailError', 'regEmailSuccess'); return ok; }
+        function validatePass() { let v = document.getElementById('regPass').value; if (!v) { hideVal('regPass', 'regPassError', 'regPassSuccess'); return false; } let ok = v.length >= 4 && v !== '1234'; if (ok) showOk('regPass', 'regPassError', 'regPassSuccess'); else showError('regPass', 'regPassError', 'regPassSuccess'); return ok; }
+        function validatePass2() { let a = document.getElementById('regPass').value, b = document.getElementById('regPass2').value; if (!b) { hideVal('regPass2', 'regPass2Error', 'regPass2Success'); return false; } let ok = a && b && a === b; if (ok) showOk('regPass2', 'regPass2Error', 'regPass2Success'); else showError('regPass2', 'regPass2Error', 'regPass2Success'); return ok; }
+        function validateLoginTel() { let v = document.getElementById('loginTel').value.replace(/[^0-9]/g, ''); if (!v) { hideVal('loginTel', 'loginTelError'); return false; } let ok = v.length == 10; if (!ok) showError('loginTel', 'loginTelError'); else hideVal('loginTel', 'loginTelError'); return ok; }
+        function validateForgotTel() { let v = document.getElementById('forgotTel').value.replace(/[^0-9]/g, ''); if (!v) { hideVal('forgotTel', 'forgotTelError', 'forgotTelSuccess'); return false; } let user = USERS.find(u => u.tel.replace(/[^0-9]/g, '') == v); if (user) { showOk('forgotTel', 'forgotTelError', 'forgotTelSuccess'); return true; } else { showError('forgotTel', 'forgotTelError', 'forgotTelSuccess'); return false; } }
+        function validateForgotCode() { let v = document.getElementById('forgotCode').value.trim(); if (!v) { hideVal('forgotCode', 'forgotCodeError', 'forgotCodeSuccess'); return false; } if (v === forgotCode) { showOk('forgotCode', 'forgotCodeError', 'forgotCodeSuccess'); return true; } else { showError('forgotCode', 'forgotCodeError', 'forgotCodeSuccess'); return false; } }
+        function validateForgotPass() { let v = document.getElementById('forgotPass').value; if (!v) { hideVal('forgotPass', 'forgotPassError'); return false; } if (v.length >= 4) { hideVal('forgotPass', 'forgotPassError'); return true; } else { showError('forgotPass', 'forgotPassError'); return false; } }
+        function validateForgotPass2() { let a = document.getElementById('forgotPass').value, b = document.getElementById('forgotPass2').value; if (!b) { hideVal('forgotPass2', 'forgotPass2Error'); return false; } if (a === b) { hideVal('forgotPass2', 'forgotPass2Error'); return true; } else { showError('forgotPass2', 'forgotPass2Error'); return false; } }
+
+        let USERS = []; try { USERS = JSON.parse(localStorage.getItem('youde_users_v3') || '[]'); } catch (e) { }
+        let CURRENT_USER = null; try { CURRENT_USER = JSON.parse(localStorage.getItem('youde_current_user_v3') || 'null'); } catch (e) { }
+        function saveUsers() { localStorage.setItem('youde_users_v3', JSON.stringify(USERS)); }
+        function saveCurrentUser() { localStorage.setItem('youde_current_user_v3', JSON.stringify(CURRENT_USER)); }
+        function openAuth(mode) { document.getElementById('authModal').classList.add('open'); if (mode == 'login') switchAuthTab('login'); else if (mode == 'register') switchAuthTab('register'); else if (mode == 'forgot') switchAuthTab('forgot'); }
+        function closeAuth() { document.getElementById('authModal').classList.remove('open'); }
+        function switchAuthTab(tab) {
+            document.getElementById('tabLogin').classList.remove('active'); document.getElementById('tabRegister').classList.remove('active'); document.getElementById('tabForgot').classList.remove('active');
+            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.add('hidden'); document.getElementById('forgotForm').classList.add('hidden');
+            if (tab == 'login') { document.getElementById('tabLogin').classList.add('active'); document.getElementById('loginForm').classList.remove('hidden'); }
+            else if (tab == 'register') { document.getElementById('tabRegister').classList.add('active'); document.getElementById('registerForm').classList.remove('hidden'); }
+            else { document.getElementById('tabForgot').classList.add('active'); document.getElementById('forgotForm').classList.remove('hidden'); document.getElementById('forgotStep1').classList.remove('hidden'); document.getElementById('forgotStep2').classList.add('hidden'); }
+        }
+
+        // --- BLOCAGE RÔLE ---
+        function register() {
+            if (!validateNom()) { document.getElementById('globalError').textContent = '❌ Faux nom - Vrai nom ex: Yao Kouassi'; document.getElementById('globalError').classList.add('show'); return; }
+            if (!validateTel()) { document.getElementById('globalError').textContent = '❌ Faux numéro - 10 chiffres 01/05/07'; document.getElementById('globalError').classList.add('show'); return; }
+            if (!validateEmail()) { document.getElementById('globalError').textContent = '❌ Faux email'; document.getElementById('globalError').classList.add('show'); return; }
+            if (!validatePass()) { document.getElementById('globalError').textContent = '❌ Faux mot de passe'; document.getElementById('globalError').classList.add('show'); return; }
+            if (!validatePass2()) { document.getElementById('globalError').textContent = '❌ Différents'; document.getElementById('globalError').classList.add('show'); return; }
+            if (!document.getElementById('regTerms').checked) { document.getElementById('regTermsError').classList.add('show'); return; }
+            let nom = document.getElementById('regNom').value.trim(); let tel = document.getElementById('regTel').value.trim(); let email = document.getElementById('regEmail').value.trim(); let role = document.getElementById('regRole').value; let pass = document.getElementById('regPass').value;
+            let cleanTel = tel.replace(/[^0-9]/g, '');
+            // BLOQUE RE-INSCRIPTION MEME NUMERO
+            if (USERS.find(u => u.tel.replace(/[^0-9]/g, '') == cleanTel)) {
+                document.getElementById('globalError').textContent = '❌ Impossible de se réinscrire - Ce numéro a déjà un compte ' + USERS.find(u => u.tel.replace(/[^0-9]/g, '') == cleanTel).role + ' - Connecte-toi ou utilise autre numéro';
+                document.getElementById('globalError').classList.add('show');
+                return;
+            }
+            let newUser = { id: Date.now(), nom: nom, tel: tel, email: email, role: role, pass: pass, roleLocked: true };
+            USERS.push(newUser); saveUsers(); CURRENT_USER = newUser; saveCurrentUser();
+            closeAuth(); updateUserUI();
+            alert('✅ Compte ' + role.toUpperCase() + ' créé ! Rôle définitif bloqué. Tu ne pourras plus utiliser ce numéro en mode ' + (role == 'vendeur' ? 'client' : 'vendeur') + '.');
+            choisir(role);
+        }
+        function login() {
+            if (!validateLoginTel()) { document.getElementById('loginError').textContent = '❌ Faux numéro'; document.getElementById('loginError').classList.add('show'); return; }
+            let tel = document.getElementById('loginTel').value.trim(); let pass = document.getElementById('loginPass').value;
+            let cleanTel = tel.replace(/[^0-9]/g, ''); let user = USERS.find(u => u.tel.replace(/[^0-9]/g, '') == cleanTel && u.pass == pass);
+            if (!user) { document.getElementById('loginError').textContent = '❌ Faux identifiants'; document.getElementById('loginError').classList.add('show'); return; }
+            CURRENT_USER = user; saveCurrentUser(); closeAuth(); updateUserUI();
+            alert('✅ Connecté en tant que ' + user.role.toUpperCase() + ' - Tu ne peux utiliser que le mode ' + user.role.toUpperCase());
+            choisir(user.role);
+        }
+        let forgotCode = ""; let forgotUser = null;
+        function sendForgotCode() {
+            let telInput = document.getElementById('forgotTel').value.replace(/[^0-9]/g, '');
+            if (telInput.length != 10) { document.getElementById('forgotTelError').textContent = '❌ Faux numéro - 10 chiffres'; document.getElementById('forgotTelError').classList.add('show'); return; }
+            let user = USERS.find(u => u.tel.replace(/[^0-9]/g, '') == telInput);
+            if (!user) { document.getElementById('forgotTelError').textContent = '❌ Faux numéro - Non trouvé'; document.getElementById('forgotTelError').classList.add('show'); return; }
+            forgotCode = Math.floor(100000 + Math.random() * 900000).toString(); forgotUser = user;
+            document.getElementById('forgotTelDisplay').textContent = user.tel; document.getElementById('forgotCodeDisplay').textContent = forgotCode;
+            document.getElementById('forgotStep1').classList.add('hidden'); document.getElementById('forgotStep2').classList.remove('hidden');
+            alert('📲 Code SMS envoyé au ' + user.tel + ' - Code: ' + forgotCode);
+        }
+        function resendForgotCode() { forgotCode = Math.floor(100000 + Math.random() * 900000).toString(); document.getElementById('forgotCodeDisplay').textContent = forgotCode; alert('Nouveau code: ' + forgotCode); }
+        function resetPassword() {
+            let code = document.getElementById('forgotCode').value.trim(); let p1 = document.getElementById('forgotPass').value; let p2 = document.getElementById('forgotPass2').value; let err = document.getElementById('forgotError');
+            if (code !== forgotCode) { document.getElementById('forgotCodeError').textContent = '❌ Faux code'; document.getElementById('forgotCodeError').classList.add('show'); err.textContent = '❌ Faux code'; err.classList.add('show'); return; }
+            if (p1.length < 4) { document.getElementById('forgotPassError').classList.add('show'); return; }
+            if (p1 !== p2) { document.getElementById('forgotPass2Error').classList.add('show'); err.textContent = '❌ Différents'; err.classList.add('show'); return; }
+            forgotUser.pass = p1; saveUsers(); alert('✅ Mot de passe réinitialisé !'); switchAuthTab('login');
+        }
+        function logout() { if (!confirm('Déconnexion ? Ton rôle reste bloqué, tu devras te reconnecter en tant que ' + CURRENT_USER.role)) return; CURRENT_USER = null; saveCurrentUser(); updateUserUI(); showRoles(); }
+        function updateUserUI() {
+            let userInfo = document.getElementById('userInfo'); let authBtn = document.getElementById('authBtn'); let logoutBtn = document.getElementById('logoutBtn');
+            let rolePromptTitle = document.getElementById('rolePromptTitle'); let rolePromptText = document.getElementById('rolePromptText');
+            let cardClient = document.getElementById('cardClient'); let cardVendeur = document.getElementById('cardVendeur'); let cardLivreur = document.getElementById('cardLivreur');
+            let lockClient = document.getElementById('lockClient'); let lockVendeur = document.getElementById('lockVendeur'); let lockLivreur = document.getElementById('lockLivreur');
+            if (CURRENT_USER) {
+                userInfo.classList.remove('hidden'); userInfo.innerHTML = '<div class="user-badge">👤 ' + CURRENT_USER.nom + ' - ' + CURRENT_USER.role.toUpperCase() + ' - ' + CURRENT_USER.tel + ' 🔒 Rôle bloqué</div>'; authBtn.classList.add('hidden'); logoutBtn.classList.remove('hidden');
+                if (rolePromptTitle) rolePromptTitle.textContent = '🔒 Connecté en tant que ' + CURRENT_USER.role.toUpperCase();
+                if (rolePromptText) rolePromptText.textContent = 'Ton compte est bloqué en mode ' + CURRENT_USER.role.toUpperCase() + '. Tu ne peux PAS utiliser le même compte en mode ' + (CURRENT_USER.role == 'client' ? 'VENDEUR/LIVREUR' : CURRENT_USER.role == 'vendeur' ? 'CLIENT/LIVREUR' : 'CLIENT/VENDEUR') + '. Pour autre rôle, crée autre compte avec autre numéro.';
+                // BLOQUE LES AUTRES CARTES
+                [cardClient, cardVendeur, cardLivreur].forEach(c => { c.style.opacity = '1'; c.style.pointerEvents = 'auto'; });
+                [lockClient, lockVendeur, lockLivreur].forEach(l => l.classList.add('hidden'));
+                if (CURRENT_USER.role == 'client') {
+                    cardVendeur.style.opacity = '.4'; cardVendeur.style.pointerEvents = 'none'; cardVendeur.style.filter = 'grayscale(1)'; lockVendeur.classList.remove('hidden');
+                    cardLivreur.style.opacity = '.4'; cardLivreur.style.pointerEvents = 'none'; cardLivreur.style.filter = 'grayscale(1)'; lockLivreur.classList.remove('hidden');
+                } else if (CURRENT_USER.role == 'vendeur') {
+                    cardClient.style.opacity = '.4'; cardClient.style.pointerEvents = 'none'; cardClient.style.filter = 'grayscale(1)'; lockClient.classList.remove('hidden');
+                    cardLivreur.style.opacity = '.4'; cardLivreur.style.pointerEvents = 'none'; cardLivreur.style.filter = 'grayscale(1)'; lockLivreur.classList.remove('hidden');
+                } else if (CURRENT_USER.role == 'livreur') {
+                    cardClient.style.opacity = '.4'; cardClient.style.pointerEvents = 'none'; cardClient.style.filter = 'grayscale(1)'; lockClient.classList.remove('hidden');
+                    cardVendeur.style.opacity = '.4'; cardVendeur.style.pointerEvents = 'none'; cardVendeur.style.filter = 'grayscale(1)'; lockVendeur.classList.remove('hidden');
+                }
+            } else {
+                userInfo.classList.add('hidden'); authBtn.classList.remove('hidden'); logoutBtn.classList.add('hidden');
+                if (rolePromptTitle) rolePromptTitle.textContent = '👤 Choisis ton rôle définitif';
+                if (rolePromptText) rolePromptText.textContent = 'Une fois ton compte créé, tu ne pourras plus changer de rôle avec le même numéro. Vendeur reste vendeur, Client reste client.';
+                [cardClient, cardVendeur, cardLivreur].forEach(c => { if (c) { c.style.opacity = '1'; c.style.pointerEvents = 'auto'; c.style.filter = 'none'; } });
+                [lockClient, lockVendeur, lockLivreur].forEach(l => { if (l) l.classList.add('hidden'); });
+            }
+        }
+        function requireAuthAndChoose(role) {
+            if (!CURRENT_USER) { openAuth('register'); document.getElementById('regRole').value = role; return; }
+            // BLOCAGE : vendeur ne peut pas utiliser même compte en client et inversement
+            if (CURRENT_USER.role !== role) {
+                alert('❌ BLOCAGE RÔLE\n\nTon compte est un compte ' + CURRENT_USER.role.toUpperCase() + ' (' + CURRENT_USER.tel + ')\nTu ne peux PAS l utiliser en mode ' + role.toUpperCase() + '. \n\n👉 Pour utiliser le mode ' + role.toUpperCase() + ', crée un NOUVEAU compte avec un AUTRE numéro de téléphone.\n\nAprès inscription tu ne pourras plus te réinscrire avec le même numéro.');
+                return;
+            }
+            choisir(role);
+        }
+
+        let ALL_ZONES = [{ commune: "Yopougon", quartier: "Niangon Bas", frais: 500 }, { commune: "Cocody", quartier: "Riviera 2", frais: 1500 }, { commune: "Marcory", quartier: "Zone 4", frais: 1500 }];
+        let DEFAULT_PLATS = [{ id: 1, nom: "Attiéké Poisson", prix: 3000, photo: "", desc: "Attiéké + poisson", commune: "Yopougon", vendeurTel: "05 86 81 94 78" }, { id: 2, nom: "Garba", prix: 1500, photo: "", desc: "Thon frit", commune: "Yopougon", vendeurTel: "05 86 81 94 78" }];
+        let PLATS = []; try { PLATS = JSON.parse(localStorage.getItem('youde_plats_v2') || '[]'); } catch (e) { } if (!PLATS.length) { PLATS = DEFAULT_PLATS; }
+        let ORDERS = []; try { ORDERS = JSON.parse(localStorage.getItem('youde_orders_v2') || '[]'); } catch (e) { }
+        let LIVREUR = null; try { LIVREUR = JSON.parse(localStorage.getItem('youde_livreur_v2') || 'null'); } catch (e) { }
+        function saveOrders() { localStorage.setItem('youde_orders_v2', JSON.stringify(ORDERS)); } function savePlats() { localStorage.setItem('youde_plats_v2', JSON.stringify(PLATS)); } function saveLivreurData() { localStorage.setItem('youde_livreur_v2', JSON.stringify(LIVREUR)); }
+        let currentRole = localStorage.getItem('youde_role_v2') || ''; let currentCommuneFilter = 'all'; let currentSearch = ''; let selectedZone = null; let frais = 0; let panier = []; let cur = null; let qty = 1; let selectedPayMethod = 'Wave';
+        function showRoles() { document.getElementById('roleScreen').classList.remove('hidden'); document.getElementById('clientView').classList.add('hidden'); document.getElementById('vendeurView').classList.add('hidden'); document.getElementById('livreurView').classList.add('hidden'); }
+        function choisir(role) {
+            // DOUBLE VERIFICATION BLOCAGE
+            if (CURRENT_USER && CURRENT_USER.role !== role) {
+                alert('❌ Ton compte ' + CURRENT_USER.role + ' ne peut pas aller en mode ' + role + '. Crée autre compte avec autre numéro.');
+                showRoles(); updateUserUI(); return;
+            }
+            currentRole = role; localStorage.setItem('youde_role_v2', role); document.getElementById('roleScreen').classList.add('hidden');
+            if (role == 'client') { document.getElementById('clientView').classList.remove('hidden'); renderCommuneTabs(); render(); }
+            else if (role == 'vendeur') { document.getElementById('vendeurView').classList.remove('hidden'); renderVendeurPlats(); renderVendeurOrders(); }
+            else if (role == 'livreur') { document.getElementById('livreurView').classList.remove('hidden'); initLivreur(); }
+        }
+        if (CURRENT_USER) { currentRole = CURRENT_USER.role; } if (currentRole && CURRENT_USER) { choisir(currentRole); } else { showRoles(); } updateUserUI();
+        function renderCommuneTabs() { let communes = ['all', ...new Set(ALL_ZONES.map(z => z.commune))]; document.getElementById('communeTabs').innerHTML = communes.map(c => '<div class="commune-tab ' + (currentCommuneFilter == c ? 'active' : '') + '" onclick="filterCommune(\'' + c + '\')">' + (c == 'all' ? 'Tout' : c) + '</div>').join(''); }
+        function filterCommune(c) { currentCommuneFilter = c; renderCommuneTabs(); render(); }
+        function filterPlats(q) { currentSearch = q.toLowerCase(); render(); }
+        function render() { let list = PLATS.filter(p => { let m = currentCommuneFilter == 'all' || p.commune.toLowerCase().includes(currentCommuneFilter.toLowerCase()); let s = !currentSearch || p.nom.toLowerCase().includes(currentSearch); return m && s; }); document.getElementById('grid').innerHTML = list.map(p => '<div class="card" onclick="openDish(' + p.id + ')"><div class="card-img">' + (p.photo ? '<img src="' + p.photo + '">' : p.nom.substring(0, 2)) + '</div><div style="padding:10px"><h3 style="font-size:11px">' + p.nom + '</h3><div style="font-size:9px;color:#777">' + p.desc + '</div><div style="display:flex;justify-content:space-between;margin-top:8px"><span style="font-weight:900;font-size:11px">' + p.prix + ' FCFA</span><button style="background:#0e4d2e;color:#fff;border:none;padding:5px 10px;border-radius:999px;font-size:9px">Choisir</button></div></div></div>').join('') || 'Aucun plat'; }
+        function searchZones(q) { let el = document.getElementById('zone-list'); let query = (q || '').toLowerCase().trim(); if (!query) { el.classList.remove('open'); return; } let f = ALL_ZONES.filter(z => (z.commune + ' ' + z.quartier).toLowerCase().includes(query)).slice(0, 50); el.innerHTML = f.map(z => '<div class="zone-item" onclick="selectZone(\'' + z.commune + '\',\'' + z.quartier + '\',' + z.frais + ')"><div><b>' + z.quartier + '</b><br><small>' + z.commune + '</small></div><b>' + z.frais + 'F</b></div>').join(''); el.classList.add('open'); }
+        function selectZone(c, q, f) { selectedZone = { commune: c, quartier: q, frais: f }; document.getElementById('zone').value = c + ' ' + q; document.getElementById('zone-search').value = q + ', ' + c; document.getElementById('zone-selected').innerHTML = '✅ ' + q + ' - ' + c + ' - ' + f + 'F'; document.getElementById('zone-list').classList.remove('open'); frais = f; updateCart(); }
+        function previewVendeur(input) { let file = input.files[0]; if (!file) return; let reader = new FileReader(); reader.onload = e => { document.getElementById('v-preview').src = e.target.result; document.getElementById('v-preview').style.display = 'block'; document.getElementById('v-photo').value = e.target.result; }; reader.readAsDataURL(file); }
+        function ajouterPlat() { let nom = document.getElementById('v-nom').value.trim(); let prix = parseInt(document.getElementById('v-prix').value); let photo = document.getElementById('v-photo').value; let tel = document.getElementById('v-tel').value.trim() || (CURRENT_USER ? CURRENT_USER.tel : ""); if (!nom || !prix) { alert('Nom et prix'); return; } PLATS.unshift({ id: Date.now(), nom: nom, prix: prix, photo: photo, desc: document.getElementById('v-desc').value || "Fait maison", commune: "Yopougon", vendeurTel: tel }); savePlats(); render(); renderVendeurPlats(); alert('Plat ajouté'); }
+        function renderVendeurPlats() { let myPlats = CURRENT_USER ? PLATS.filter(p => p.vendeurTel == CURRENT_USER.tel) : PLATS; document.getElementById('vendeur-mes-plats').innerHTML = myPlats.map(p => '<div style="display:flex;justify-content:space-between;padding:8px;background:#f9fafb;border-radius:10px;margin-bottom:6px"><b>' + p.nom + '</b><button onclick="supprimerPlat(' + p.id + ')" class="btn btn-red" style="padding:4px 8px;font-size:10px">X</button></div>').join('') || 'Aucun'; }
+        function supprimerPlat(id) { PLATS = PLATS.filter(p => p.id != id); savePlats(); render(); renderVendeurPlats(); }
+        function renderVendeurOrders() { document.getElementById('vendeur-orders').innerHTML = ORDERS.slice().reverse().map(o => '<div style="padding:10px;background:#fffbeb;border-radius:10px;margin-bottom:8px;border-left:4px solid #f59e0b"><b>#' + o.id.toString().slice(-4) + ' - ' + o.status + '</b><br>' + o.items.map(i => i.nom).join(', ') + '<br>' + o.total + 'F - ' + o.zone + '</div>').join('') || 'Aucune commande'; }
+        function selectPayCard(method) { selectedPayMethod = method; document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('active')); if (method == 'Wave') document.getElementById('cardWave').classList.add('active'); if (method == 'Orange Money') document.getElementById('cardOrange').classList.add('active'); if (method == 'Moov Money') document.getElementById('cardMoov').classList.add('active'); if (method == 'MTN MoMo') document.getElementById('cardMTN').classList.add('active'); }
+        function checkPayNumber() { let v = document.getElementById('payNumber').value.replace(/[^0-9]/g, ''); let err = document.getElementById('payNumberError'); if (v.length == 0) { err.classList.remove('show'); return false; } if (v.length == 10 && (v.startsWith('01') || v.startsWith('05') || v.startsWith('07'))) { err.classList.remove('show'); return true; } else { err.classList.add('show'); return false; } }
+        function updateCart() { let sub = panier.reduce((a, b) => a + b.prix * b.qte, 0); let delivery = frais || 0; let fee = Math.round(sub * 0.05); let total = sub + delivery + fee; let toSeller = Math.round(sub * 0.95); document.getElementById('escrowSub').textContent = sub.toLocaleString() + 'F'; document.getElementById('escrowTotal').textContent = total.toLocaleString() + 'F'; document.getElementById('escrowToSeller').textContent = toSeller.toLocaleString() + 'F'; document.getElementById('count').textContent = panier.reduce((a, b) => a + b.qte, 0); let d = document.getElementById('cart-items'); if (!panier.length) { d.innerHTML = '<p style="text-align:center;color:#888;margin-top:20px">Panier vide</p>'; return } d.innerHTML = panier.map((p, i) => '<div style="padding:8px;background:#fafafa;border-radius:8px;margin-bottom:6px"><b>' + p.nom + ' x' + p.qte + '</b> - ' + (p.prix * p.qte).toLocaleString() + 'F <button onclick="panier.splice(' + i + ',1);updateCart()" style="float:right;border:none;background:#fee;color:#c00;padding:3px 8px;border-radius:6px">X</button></div>').join(''); }
+        function openDish(id) { let p = PLATS.find(x => x.id == id); cur = p; qty = 1; document.getElementById('m-img-div').innerHTML = p.photo ? '<img src="' + p.photo + '" style="width:100%;height:100%;object-fit:cover">' : p.nom; document.getElementById('m-nom').textContent = p.nom; document.getElementById('m-desc').textContent = p.desc; document.getElementById('m-prix').textContent = p.prix + ' FCFA'; document.getElementById('m-qty').textContent = 1; document.getElementById('m-total').textContent = p.prix + ' FCFA'; document.getElementById('modal').classList.add('open'); }
+        function changeQty(d) { qty = Math.max(1, qty + d); document.getElementById('m-qty').textContent = qty; document.getElementById('m-total').textContent = (cur.prix * qty).toLocaleString() + " FCFA"; }
+        function confirmAdd() { panier.push(Object.assign({}, cur, { qte: qty })); updateCart(); document.getElementById('modal').classList.remove('open'); document.getElementById('cart').classList.add('open'); }
+        function toggleCart() { document.getElementById('cart').classList.toggle('open'); }
+        function commanderEscrow() {
+            if (!panier.length) { alert('Panier vide'); return; }
+            if (!selectedZone) { alert('Choisis Quartier - Ex: Riviera 2'); return; }
+            let transId = document.getElementById('trans-id').value.trim();
+            if (transId.length < 5) { document.getElementById('transError').textContent = '❌ Faux ID transaction'; document.getElementById('transError').classList.add('show'); alert('❌ Faux ID transaction'); return; }
+            document.getElementById('transError').classList.remove('show');
+            let payNum = document.getElementById('payNumber').value.trim();
+            let sub = panier.reduce((a, b) => a + b.prix * b.qte, 0); let total = sub + frais + Math.round(sub * 0.05);
+            let orderId = Date.now();
+            ORDERS.push({ id: orderId, items: [].concat(panier), total: total, toSeller: Math.round(sub * 0.95), zone: selectedZone.quartier, transId: transId, payNumber: payNum, payMethod: selectedPayMethod, status: "En attente vendeur", escrow: true, livreur: null, currentStep: 1, clientTel: CURRENT_USER ? CURRENT_USER.tel : payNum });
+            saveOrders(); panier = []; updateCart(); toggleCart();
+            alert('✅ Commande passée ! Total bloqué escrow: ' + total.toLocaleString() + 'F');
+            renderVendeurOrders();
+        }
+        function openOrders() { document.getElementById('ordersModal').style.display = 'flex'; document.getElementById('client-orders-list').innerHTML = ORDERS.slice().reverse().map(o => '<div style="padding:10px;background:#fff;border-radius:10px;margin-bottom:8px;border-left:4px solid #f59e0b"><b>#' + o.id.toString().slice(-4) + ' - ' + o.total + 'F</b><br>' + o.items.map(i => i.nom).join(', ') + '<br>ID: ' + (o.transId || '') + ' - ' + o.zone + '</div>').join('') || 'Aucune'; }
+        function closeOrders() { document.getElementById('ordersModal').style.display = 'none'; }
+        function initLivreur() { if (LIVREUR) { document.getElementById('livreurSetup').classList.add('hidden'); document.getElementById('livreurDashboard').classList.remove('hidden'); renderLivreur(); } else { document.getElementById('livreurSetup').classList.remove('hidden'); document.getElementById('livreurDashboard').classList.add('hidden'); } }
+        function saveLivreur() { let nom = document.getElementById('l-nom').value.trim(); let tel = document.getElementById('l-tel').value.trim(); if (!nom) { alert('❌ Faux nom livreur'); return; } if (tel.replace(/[^0-9]/g, '').length != 10) { alert('❌ Faux numéro livreur'); return; } LIVREUR = { nom: nom, tel: tel, transport: document.getElementById('l-transport').value, zone: document.getElementById('l-zone').value }; saveLivreurData(); initLivreur(); alert('✅ Devenu livreur !'); }
+        function renderLivreur() { let available = ORDERS.filter(o => !o.livreur && o.escrow && !o.status.includes('Refus')); let my = ORDERS.filter(o => o.livreur && o.livreur.tel == LIVREUR.tel); document.getElementById('l-total').textContent = my.length; document.getElementById('l-gain').textContent = my.filter(o => o.status.includes('Livrée')).reduce((a, b) => a + b.total * 0.1 || 0, 0).toLocaleString() + "F"; document.getElementById('l-dispo').textContent = available.length; document.getElementById('livreur-available').innerHTML = available.map(o => '<div style="padding:10px;background:#fffbeb;border-radius:10px;margin-bottom:8px;border-left:4px solid #f59e0b"><b>#' + o.id.toString().slice(-4) + ' - ' + o.zone + ' - ' + o.total + 'F</b><br>' + o.items.map(i => i.nom + ' x' + i.qte).join(', ') + '<br><button onclick="accepterLivraison(' + o.id + ')" style="background:#2563eb;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-size:11px;margin-top:6px">🛵 Accepter</button></div>').join('') || "Aucune"; document.getElementById('livreur-my').innerHTML = my.map(o => '<div style="padding:10px;background:#eff6ff;border-radius:10px;margin-bottom:8px;border-left:4px solid #2563eb"><b>#' + o.id.toString().slice(-4) + ' - ' + o.status + '</b></div>').join('') || "Pas de livraison"; }
+        function accepterLivraison(orderId) { let o = ORDERS.find(x => x.id == orderId); if (!o) return; o.livreur = { ...LIVREUR }; o.status = 'Acceptée par livreur ' + LIVREUR.nom + ' 🛵'; o.currentStep = 2; saveOrders(); renderLivreur(); renderVendeurOrders(); }
+    </script>
+</body>
+
+</html>
